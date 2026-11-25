@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>平方根の計算練習プログラム</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Noto Sans JP -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- MathJax v3 設定と読み込み（教科書品質のTeX数式表示） -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      chtml: {
+        scale: 1.08,
+        mtextInheritFont: true
+      },
+      startup: {
+        typeset: false
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+  <style>
+    html, body {
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', sans-serif;
+      background-color: #F8FAFC;
+      color: #1E293B;
+    }
+
+    /* 数式コンテナの横スクロール防止と長い式の安全なスクロール対応 */
+    .math-display-box {
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* 印刷用スタイル（A4ワークシート形式） */
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 14mm 15mm;
+      }
+      body {
+        background-color: #FFFFFF !important;
+        color: #000000 !important;
+        font-size: 11pt;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-only {
+        display: block !important;
+      }
+      .print-card {
+        border: 1px solid #CBD5E1 !important;
+        box-shadow: none !important;
+        break-inside: avoid;
+        padding: 12px 14px !important;
+        min-height: 78px;
+      }
+      .print-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+      }
+      .print-page-break {
+        page-break-before: always;
+        break-before: page;
+      }
+      .answer-card {
+        border: 1px solid #E2E8F0 !important;
+        box-shadow: none !important;
+        break-inside: avoid;
+        padding: 8px 12px !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- ヘッダー（画面表示用） -->
+  <header class="bg-[#1E3A5F] text-white shadow-sm no-print">
+    <div class="max-w-5xl mx-auto px-3.5 sm:px-6 py-3.5 sm:py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5">
+      <div class="min-w-0">
+        <span class="inline-block text-[11px] sm:text-xs tracking-wider bg-white/15 text-blue-100 px-2.5 py-0.5 rounded-full mb-1">数学Ⅰ 計算演習ジェネレーター</span>
+        <h1 class="text-lg sm:text-2xl font-bold tracking-tight leading-snug">平方根の計算練習プログラム</h1>
+      </div>
+      <div class="text-xs sm:text-sm text-blue-100 shrink-0">
+        ランダム類題作成・教科書準拠数式表示・A4印刷対応
+      </div>
+    </div>
+  </header>
+
+  <!-- 印刷用ワークシートヘッダー（印刷時のみ表示） -->
+  <div class="hidden print-only mb-4 border-b-2 border-[#1E3A5F] pb-3">
+    <div class="flex justify-between items-end">
+      <div>
+        <div class="text-xs text-slate-600 font-medium">数学Ⅰ 演習プリント</div>
+        <h1 id="print-title" class="text-xl font-bold text-[#1E3A5F]">平方根の計算練習（標準）</h1>
+      </div>
+      <div class="text-sm border border-slate-400 px-4 py-2 rounded">
+        <span>　　年　　組　　番　氏名：　　　　　　　　　　</span>
+      </div>
+    </div>
+    <p id="print-instruction" class="text-xs text-slate-700 mt-2">
+      次の計算をしなさい。※根号の中は最も簡単な整数にし、分母に根号がある場合は有理化すること。
+    </p>
+  </div>
+
+  <!-- メインコンテンツ -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
+
+    <!-- 1. 問題選択セクション -->
+    <section class="bg-white rounded-xl border border-slate-200 shadow-sm p-3.5 sm:p-6 no-print">
+      <div class="flex items-center gap-2 mb-3.5 pb-2 border-b border-slate-100">
+        <span class="w-1.5 h-5 bg-[#1E3A5F] rounded-full shrink-0"></span>
+        <h2 class="text-base sm:text-lg font-bold text-slate-800">問題選択</h2>
+      </div>
+
+      <!-- 単元ボタン一覧（スマホでは2列グリッドで見やすく配置） -->
+      <div class="mb-4 sm:mb-5">
+        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">出題単元</label>
+        <div id="category-buttons" class="grid grid-cols-2 lg:grid-cols-4 gap-2">
+          <button type="button" data-cat="1" class="cat-btn min-h-[42px] text-left px-2.5 sm:px-3.5 py-2 rounded-lg border text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 sm:gap-2">
+            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[11px] sm:text-xs font-bold bg-slate-100 text-slate-700 shrink-0">①</span>
+            <span class="leading-tight">足し算・引き算</span>
+          </button>
+          <button type="button" data-cat="2" class="cat-btn min-h-[42px] text-left px-2.5 sm:px-3.5 py-2 rounded-lg border text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 sm:gap-2">
+            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[11px] sm:text-xs font-bold bg-slate-100 text-slate-700 shrink-0">②</span>
+            <span class="leading-tight">掛け算・割り算</span>
+          </button>
+          <button type="button" data-cat="3" class="cat-btn min-h-[42px] text-left px-2.5 sm:px-3.5 py-2 rounded-lg border text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 sm:gap-2">
+            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[11px] sm:text-xs font-bold bg-slate-100 text-slate-700 shrink-0">③</span>
+            <span class="leading-tight">単項式の乗法・累乗</span>
+          </button>
+          <button type="button" data-cat="4" class="cat-btn min-h-[42px] text-left px-2.5 sm:px-3.5 py-2 rounded-lg border text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 sm:gap-2">
+            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[11px] sm:text-xs font-bold bg-slate-100 text-slate-700 shrink-0">④</span>
+            <span class="leading-tight">多項式の乗法・累乗</span>
+          </button>
+          <button type="button" data-cat="5" class="cat-btn min-h-[42px] text-left px-2.5 sm:px-3.5 py-2 rounded-lg border text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 sm:gap-2">
+            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[11px] sm:text-xs font-bold bg-slate-100 text-slate-700 shrink-0">⑤</span>
+            <span class="leading-tight">多項式同士の乗法</span>
+          </button>
+          <button type="button" data-cat="6" class="cat-btn min-h-[42px] text-left px-2.5 sm:px-3.5 py-2 rounded-lg border text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 sm:gap-2">
+            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[11px] sm:text-xs font-bold bg-slate-100 text-slate-700 shrink-0">⑥</span>
+            <span class="leading-tight">分母の有理化</span>
+          </button>
+          <button type="button" data-cat="all" class="cat-btn col-span-2 min-h-[42px] text-left px-2.5 sm:px-3.5 py-2 rounded-lg border text-xs sm:text-sm font-medium transition-all flex items-center gap-2">
+            <span class="inline-flex items-center justify-center px-1.5 h-5 rounded text-[11px] sm:text-xs font-bold bg-slate-100 text-slate-700 shrink-0">総合</span>
+            <span class="leading-tight">全範囲ミックス（①〜⑥からバランスよく出題）</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 難易度・問題数・操作ボタン -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-3.5 pt-3 border-t border-slate-100">
+        <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-3 sm:gap-5">
+          <!-- 難易度選択 -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5">難易度選択</label>
+            <div class="inline-flex w-full sm:w-auto rounded-lg border border-slate-200 bg-slate-50 p-1">
+              <button type="button" data-diff="standard" class="diff-btn flex-1 sm:flex-initial min-h-[34px] px-3.5 sm:px-4 py-1 rounded-md text-xs sm:text-sm font-medium transition-all">
+                標準
+              </button>
+              <button type="button" data-diff="applied" class="diff-btn flex-1 sm:flex-initial min-h-[34px] px-3.5 sm:px-4 py-1 rounded-md text-xs sm:text-sm font-medium transition-all">
+                応用
+              </button>
+            </div>
+          </div>
+
+          <!-- 問題数選択 -->
+          <div>
+            <label for="problem-count" class="block text-xs font-semibold text-slate-500 mb-1.5">問題数</label>
+            <select id="problem-count" class="w-full sm:w-auto min-h-[42px] rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs sm:text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]/20 focus:border-[#1E3A5F]">
+              <option value="4">4問</option>
+              <option value="6" selected>6問</option>
+              <option value="8">8問</option>
+              <option value="10">10問</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- アクションボタン群（スマホではタップしやすいフル幅レイアウト） -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+          <button type="button" id="btn-generate" class="min-h-[44px] px-5 py-2.5 rounded-lg bg-[#1E3A5F] hover:bg-[#162C49] active:scale-[0.99] text-white text-sm font-bold shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span>新しい問題を作成</span>
+          </button>
+
+          <button type="button" id="btn-print" class="min-h-[42px] px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-sm font-medium transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+            <svg class="w-4 h-4 text-slate-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+            <span>A4印刷</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. 問題表示セクション -->
+    <section class="bg-white rounded-xl border border-slate-200 shadow-sm p-3.5 sm:p-6 print:border-0 print:shadow-none print:p-0">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3.5 sm:mb-4 pb-3 border-b border-slate-100 no-print">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="w-1.5 h-5 bg-[#1E3A5F] rounded-full shrink-0"></span>
+          <h2 class="text-base sm:text-lg font-bold text-slate-800">問題表示</h2>
+          <span id="current-badge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-[#1E3A5F] border border-blue-200">
+            ① 足し算・引き算（標準）
+          </span>
+        </div>
+        <p class="text-xs text-slate-500 leading-relaxed">
+          ※根号の中は最も簡単な整数にし、分母の根号は有理化すること。
+        </p>
+      </div>
+
+      <!-- 問題グリッド（横進み：左から右、上から下） -->
+      <div id="problems-container" class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 print-grid">
+        <!-- JSで動的に問題カードを生成 -->
+      </div>
+    </section>
+
+    <!-- 3. 解答・解説セクション -->
+    <section class="bg-white rounded-xl border border-slate-200 shadow-sm p-3.5 sm:p-6 print:border-0 print:shadow-none print:p-0 print-page-break">
+      <!-- 印刷時の解答ページヘッダー -->
+      <div class="hidden print-only mb-4 border-b-2 border-[#1E3A5F] pb-2">
+        <h2 id="print-answer-title" class="text-lg font-bold text-[#1E3A5F]">平方根の計算練習（標準）【解答・解説】</h2>
+      </div>
+
+      <!-- 狭い画面でも絶対に重ならないよう flex-wrap + gap で調整 -->
+      <div class="flex flex-wrap items-center justify-between gap-2.5 mb-3.5 sm:mb-4 pb-3 border-b border-slate-100 no-print">
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="w-1.5 h-5 bg-emerald-600 rounded-full shrink-0"></span>
+          <h2 class="text-base sm:text-lg font-bold text-slate-800 whitespace-nowrap">解答・解説</h2>
+        </div>
+
+        <button type="button" id="btn-toggle-answers" class="w-full sm:w-auto min-h-[40px] px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold shadow-sm transition-all flex items-center justify-center gap-1.5 shrink-0 whitespace-nowrap cursor-pointer">
+          <svg id="eye-icon" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span id="toggle-answers-text">解答・解説を表示する</span>
+        </button>
+      </div>
+
+      <!-- 解答非表示時のプレースホルダー -->
+      <div id="answers-placeholder" class="py-6 sm:py-8 px-3 text-center text-xs sm:text-sm text-slate-400 bg-slate-50/70 rounded-lg border border-dashed border-slate-200 no-print leading-relaxed">
+        「解答・解説を表示する」ボタン、または各問題の「答えを見る」を押すと途中式と解答が表示されます。
+      </div>
+
+      <!-- 解答一覧グリッド -->
+      <div id="answers-container" class="hidden print:grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-3.5 print-grid">
+        <!-- JSで動的に解答カードを生成 -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- フッター -->
+  <footer class="max-w-5xl w-full mx-auto px-4 sm:px-6 py-4 text-center text-xs text-slate-400 no-print">
+    数学Ⅰ 平方根の四則演算・分母の有理化 練習プログラム
+  </footer>
+
+  <script>
+    /**
+     * 数学ユーティリティ関数群（厳密な約分・根号の簡単化・LaTeX整形）
+     */
+    const MathUtil = {
+      // 最大公約数
+      gcd(a, b) {
+        a = Math.abs(a);
+        b = Math.abs(b);
+        while (b !== 0) {
+          const t = b;
+          b = a % b;
+          a = t;
+        }
+        return a;
+      },
+
+      // 配列からランダムに1要素取得
+      pick(arr) {
+        return arr[Math.floor(Math.random() * arr.length)];
+      },
+
+      // 配列をシャッフルして返す
+      shuffle(arr) {
+        const copy = [...arr];
+        for (let i = copy.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+      },
+
+      // 正の整数 n を k^2 * r に分解し { k, r } を返す (例: 12 -> {k:2, r:3})
+      simplifyRad(n) {
+        let k = 1;
+        let r = n;
+        for (let i = 2; i * i <= r; i++) {
+          while (r % (i * i) === 0) {
+            k *= i;
+            r /= i * i;
+          }
+        }
+        return { k, r };
+      },
+
+      // 単項式 c * \sqrt{r} をきれいなTeX文字列に変換 (r=1なら整数c、c=1なら\sqrt{r}、c=-1なら-\sqrt{r})
+      fmtTerm(c, r, forceSign = false) {
+        if (c === 0) return forceSign ? '' : '0';
+        const sign = c < 0 ? '-' : (forceSign ? '+' : '');
+        const absC = Math.abs(c);
+        if (r === 1) {
+          return `${sign}${absC}`;
+        }
+        const coeffStr = absC === 1 ? '' : `${absC}`;
+        return `${sign}${coeffStr}\\sqrt{${r}}`;
+      },
+
+      // 括弧付きの負の数表示 (例: -3 -> (-3), 3 -> 3)
+      fmtParenIfNeg(str, isNeg) {
+        return isNeg ? `(${str})` : str;
+      },
+
+      // 複数の単項式 [{c, r}, ...] を同類項でまとめて整形
+      combineTerms(terms) {
+        const map = new Map();
+        for (const t of terms) {
+          if (t.c === 0) continue;
+          const { k, r } = this.simplifyRad(t.r);
+          const totalC = t.c * k;
+          map.set(r, (map.get(r) || 0) + totalC);
+        }
+        // 整数(r=1)を先頭に、その後は r の昇順に並べる
+        const keys = Array.from(map.keys()).sort((a, b) => a - b);
+        let parts = [];
+        for (const r of keys) {
+          const c = map.get(r);
+          if (!c) continue;
+          parts.push(this.fmtTerm(c, r, parts.length > 0));
+        }
+        return parts.length > 0 ? parts.join(' ') : '0';
+      },
+
+      // 分数 (numCoeff * \sqrt{numRad} + constTerm) / den の簡約化TeX出力
+      // ここでは単項分子 (c * \sqrt{r}) / d を完全に約分して返す
+      fmtSimpleFrac(c, r, d) {
+        if (c === 0) return '0';
+        if (d < 0) {
+          c = -c;
+          d = -d;
+        }
+        const { k, r: simpR } = this.simplifyRad(r);
+        c *= k;
+        const g = this.gcd(c, d);
+        c /= g;
+        d /= g;
+        if (d === 1) {
+          return this.fmtTerm(c, simpR, false);
+        }
+        const sign = c < 0 ? '-' : '';
+        const absC = Math.abs(c);
+        const numStr = simpR === 1 ? `${absC}` : `${absC === 1 ? '' : absC}\\sqrt{${simpR}}`;
+        return `${sign}\\frac{${numStr}}{${d}}`;
+      }
+    };
+
+    /**
+     * 各単元・難易度別の問題生成エンジン
+     * プリント作成時の条件（基数 {2,3,5,7} およびその平方数倍、除算は分数にならない等）を厳密に遵守
+     */
+    const ProblemGenerators = {
+      // ① 足し算・引き算
+      cat1(diff) {
+        const bases = [2, 3, 5, 7];
+        if (diff === 'standard') {
+          const type = MathUtil.pick(['direct', 'two_rad', 'two_rad_sub', 'three_rad']);
+          const r = MathUtil.pick(bases);
+
+          if (type === 'direct') {
+            // 例: 3\sqrt{2} + 4\sqrt{2}, 7\sqrt{3} - 4\sqrt{3}
+            const isAdd = Math.random() < 0.5;
+            const a = MathUtil.pick([2, 3, 4, 5, 6, 7, 8, 9]);
+            let b = MathUtil.pick([2, 3, 4, 5, 6, 7, 8]);
+            if (a === b && !isAdd) b = a + 2;
+            const c = isAdd ? a + b : a - b;
+            const op = isAdd ? '+' : '-';
+            return {
+              q: `${a}\\sqrt{${r}} ${op} ${b}\\sqrt{${r}}`,
+              step: `(${a} ${op} ${b})\\sqrt{${r}}`,
+              ans: MathUtil.fmtTerm(c, r)
+            };
+          }
+
+          if (type === 'two_rad' || type === 'two_rad_sub') {
+            // 例: \sqrt{12} + \sqrt{27}, \sqrt{45} - \sqrt{20}
+            const mults = MathUtil.shuffle([2, 3, 4, 5]).slice(0, 2);
+            const [m1, m2] = type === 'two_rad' ? mults : mults.sort((a, b) => b - a);
+            const n1 = m1 * m1 * r;
+            const n2 = m2 * m2 * r;
+            const isAdd = type === 'two_rad';
+            const op = isAdd ? '+' : '-';
+            const ansC = isAdd ? m1 + m2 : m1 - m2;
+            return {
+              q: `\\sqrt{${n1}} ${op} \\sqrt{${n2}}`,
+              step: `${m1}\\sqrt{${r}} ${op} ${m2}\\sqrt{${r}}`,
+              ans: MathUtil.fmtTerm(ansC, r)
+            };
+          }
+
+          // three_rad: 例: \sqrt{18} + 2\sqrt{2} - \sqrt{50}
+          const mults = MathUtil.shuffle([2, 3, 4, 5]).slice(0, 2);
+          const [m1, m3] = mults;
+          const m2 = MathUtil.pick([1, 2, 3, 4]);
+          const n1 = m1 * m1 * r;
+          const n3 = m3 * m3 * r;
+          const op1 = Math.random() < 0.5 ? '+' : '-';
+          const op2 = Math.random() < 0.5 ? '+' : '-';
+          const c2 = op1 === '+' ? m2 : -m2;
+          const c3 = op2 === '+' ? m3 : -m3;
+          const ansC = m1 + c2 + c3;
+          return {
+            q: `\\sqrt{${n1}} ${op1} ${MathUtil.fmtTerm(m2, r)} ${op2} \\sqrt{${n3}}`,
+            step: `${m1}\\sqrt{${r}} ${op1} ${MathUtil.fmtTerm(m2, r)} ${op2} ${m3}\\sqrt{${r}}`,
+            ans: MathUtil.fmtTerm(ansC, r)
+          };
+        } else {
+          // 応用: 2種類の根号が混在、または簡単な有理化を含む加減
+          const subType = MathUtil.pick(['two_families', 'with_coeff', 'with_rat']);
+          if (subType === 'two_families') {
+            // 例: \sqrt{18} + \sqrt{12} + \sqrt{32} - \sqrt{27}
+            const [r1, r2] = MathUtil.shuffle(bases).slice(0, 2);
+            const [a1, a2] = MathUtil.shuffle([2, 3, 4]).slice(0, 2);
+            const [b1, b2] = MathUtil.shuffle([2, 3, 4]).slice(0, 2);
+            const op1 = Math.random() < 0.5 ? '+' : '-';
+            const op2 = Math.random() < 0.5 ? '+' : '-';
+            const q = `\\sqrt{${a1 * a1 * r1}} + \\sqrt{${b1 * b1 * r2}} ${op1} \\sqrt{${a2 * a2 * r1}} ${op2} \\sqrt{${b2 * b2 * r2}}`;
+            const s1 = `${a1}\\sqrt{${r1}} + ${b1}\\sqrt{${r2}} ${op1} ${a2}\\sqrt{${r1}} ${op2} ${b2}\\sqrt{${r2}}`;
+            const ans = MathUtil.combineTerms([
+              { c: a1, r: r1 },
+              { c: b1, r: r2 },
+              { c: op1 === '+' ? a2 : -a2, r: r1 },
+              { c: op2 === '+' ? b2 : -b2, r: r2 }
+            ]);
+            return { q, step: s1, ans };
+          }
+
+          if (subType === 'with_coeff') {
+            // 例: 3\sqrt{12} - 2\sqrt{27} + \sqrt{48}
+            const r = MathUtil.pick([2, 3, 5]);
+            const [m1, m2, m3] = MathUtil.shuffle([2, 3, 4]).slice(0, 3);
+            const k1 = MathUtil.pick([2, 3]);
+            const k2 = MathUtil.pick([2, 3]);
+            const op1 = Math.random() < 0.5 ? '+' : '-';
+            const op2 = Math.random() < 0.5 ? '+' : '-';
+            const q = `${k1}\\sqrt{${m1 * m1 * r}} ${op1} ${k2}\\sqrt{${m2 * m2 * r}} ${op2} \\sqrt{${m3 * m3 * r}}`;
+            const t1 = k1 * m1;
+            const t2 = k2 * m2;
+            const s = `${t1}\\sqrt{${r}} ${op1} ${t2}\\sqrt{${r}} ${op2} ${m3}\\sqrt{${r}}`;
+            const ansC = t1 + (op1 === '+' ? t2 : -t2) + (op2 === '+' ? m3 : -m3);
+            return { q, step: s, ans: MathUtil.fmtTerm(ansC, r) };
+          }
+
+          // with_rat: 例: \sqrt{8} + \frac{6}{\sqrt{2}}
+          const r = MathUtil.pick([2, 3, 5]);
+          const m = MathUtil.pick([2, 3, 4]);
+          const mult = MathUtil.pick([2, 3, 4]);
+          const num = r * mult;
+          const isAdd = Math.random() < 0.5;
+          const op = isAdd ? '+' : '-';
+          const q = `\\sqrt{${m * m * r}} ${op} \\frac{${num}}{\\sqrt{${r}}}`;
+          const step = `${m}\\sqrt{${r}} ${op} ${mult}\\sqrt{${r}}`;
+          const ansC = isAdd ? m + mult : m - mult;
+          return { q, step, ans: MathUtil.fmtTerm(ansC, r) };
+        }
+      },
+
+      // ② 掛け算・割り算（除算は必ず分数にならないよう制御）
+      cat2(diff) {
+        if (diff === 'standard') {
+          const isDiv = Math.random() < 0.45;
+          if (!isDiv) {
+            // 乗法: 4パターン
+            const pType = MathUtil.pick(['prime_pair', 'coeff_pair', 'neg_coeff', 'simplify_prod']);
+            if (pType === 'prime_pair') {
+              const [a, b] = MathUtil.shuffle([2, 3, 5, 7, 11]).slice(0, 2);
+              return {
+                q: `\\sqrt{${a}} \\times \\sqrt{${b}}`,
+                step: `\\sqrt{${a} \\times ${b}}`,
+                ans: `\\sqrt{${a * b}}`
+              };
+            }
+            if (pType === 'coeff_pair') {
+              const [a, b] = MathUtil.shuffle([2, 3, 5, 7]).slice(0, 2);
+              const k1 = MathUtil.pick([2, 3, 4]);
+              const k2 = MathUtil.pick([2, 3, 5]);
+              return {
+                q: `${k1}\\sqrt{${a}} \\times ${k2}\\sqrt{${b}}`,
+                step: `(${k1} \\times ${k2})\\sqrt{${a} \\times ${b}}`,
+                ans: `${k1 * k2}\\sqrt{${a * b}}`
+              };
+            }
+            if (pType === 'neg_coeff') {
+              const [a, b] = MathUtil.shuffle([2, 3, 5, 7]).slice(0, 2);
+              const k1 = MathUtil.pick([2, 3, 4]);
+              const k2 = MathUtil.pick([2, 3, 4]);
+              return {
+                q: `(-${k1}\\sqrt{${a}}) \\times ${k2}\\sqrt{${b}}`,
+                step: `(-${k1} \\times ${k2})\\sqrt{${a} \\times ${b}}`,
+                ans: `-${k1 * k2}\\sqrt{${a * b}}`
+              };
+            }
+            // simplify_prod: \sqrt{3} \times \sqrt{6} = 3\sqrt{2} など
+            const pairs = [
+              [2, 6, 2, 3], [2, 10, 2, 5], [2, 14, 2, 7],
+              [3, 6, 3, 2], [3, 15, 3, 5], [5, 10, 5, 2], [5, 15, 5, 3]
+            ];
+            const [a, b, outK, inR] = MathUtil.pick(pairs);
+            return {
+              q: `\\sqrt{${a}} \\times \\sqrt{${b}}`,
+              step: `\\sqrt{${a * b}} = \\sqrt{${outK}^2 \\times ${inR}}`,
+              ans: `${outK}\\sqrt{${inR}}`
+            };
+          } else {
+            // 除法（必ず割り切れる）
+            const dType = MathUtil.pick(['simple_div', 'int_div', 'coeff_div']);
+            if (dType === 'simple_div') {
+              const [qRad, divRad] = MathUtil.shuffle([2, 3, 5, 7, 11]).slice(0, 2);
+              const dividend = qRad * divRad;
+              return {
+                q: `\\sqrt{${dividend}} \\div \\sqrt{${divRad}}`,
+                step: `\\sqrt{${dividend} \\div ${divRad}}`,
+                ans: `\\sqrt{${qRad}}`
+              };
+            }
+            if (dType === 'int_div') {
+              const k = MathUtil.pick([2, 3]);
+              const divRad = MathUtil.pick([2, 3, 5]);
+              const dividend = k * k * divRad;
+              return {
+                q: `\\sqrt{${dividend}} \\div \\sqrt{${divRad}}`,
+                step: `\\sqrt{${dividend} \\div ${divRad}} = \\sqrt{${k * k}}`,
+                ans: `${k}`
+              };
+            }
+            // coeff_div: 例 9\sqrt{10} \div 3\sqrt{2} = 3\sqrt{5}
+            const [qRad, divRad] = MathUtil.shuffle([2, 3, 5, 7]).slice(0, 2);
+            const qCoeff = MathUtil.pick([2, 3, 4]);
+            const divCoeff = MathUtil.pick([2, 3, 4, 5]);
+            const dividend = qRad * divRad;
+            const c1 = qCoeff * divCoeff;
+            return {
+              q: `${c1}\\sqrt{${dividend}} \\div ${divCoeff}\\sqrt{${divRad}}`,
+              step: `(${c1} \\div ${divCoeff})\\sqrt{${dividend} \\div ${divRad}}`,
+              ans: `${qCoeff}\\sqrt{${qRad}}`
+            };
+          }
+        } else {
+          // 応用: 大きな積の変形や3項の乗除ミックス
+          const aType = MathUtil.pick(['big_prod', 'three_mix', 'neg_div']);
+          if (aType === 'big_prod') {
+            // 例: \sqrt{12} \times \sqrt{15} = 6\sqrt{5}
+            const combos = [
+              [6, 15, 3, 10], [12, 15, 6, 5], [6, 14, 2, 21],
+              [10, 15, 5, 6], [14, 21, 7, 6], [12, 10, 2, 30]
+            ];
+            const [a, b, outK, inR] = MathUtil.pick(combos);
+            const k1 = MathUtil.pick([1, 2]);
+            const k2 = MathUtil.pick([1, 3]);
+            const pre1 = k1 === 1 ? '' : `${k1}`;
+            const pre2 = k2 === 1 ? '' : `${k2}`;
+            const totalK = k1 * k2 * outK;
+            return {
+              q: `${pre1}\\sqrt{${a}} \\times ${pre2}\\sqrt{${b}}`,
+              step: `${k1 * k2 === 1 ? '' : (k1 * k2) + '\\times '}\\sqrt{${a * b}} = ${k1 * k2 === 1 ? '' : (k1 * k2) + '\\times '}${outK}\\sqrt{${inR}}`,
+              ans: `${totalK}\\sqrt{${inR}}`
+            };
+          }
+          if (aType === 'three_mix') {
+            // 例: \sqrt{6} \times \sqrt{10} \div \sqrt{3} = 2\sqrt{5}
+            const triples = [
+              [6, 10, 3, 2, 5],
+              [15, 14, 6, 1, 35],
+              [6, 15, 2, 3, 5],
+              [10, 14, 5, 2, 7],
+              [12, 6, 2, 6, 1]
+            ];
+            const [a, b, c, outK, inR] = MathUtil.pick(triples);
+            return {
+              q: `\\sqrt{${a}} \\times \\sqrt{${b}} \\div \\sqrt{${c}}`,
+              step: `\\sqrt{\\frac{${a} \\times ${b}}{${c}}} = \\sqrt{${(a * b) / c}}`,
+              ans: MathUtil.fmtTerm(outK, inR)
+            };
+          }
+          // neg_div: 例 15\sqrt{24} \div (-3\sqrt{2}) = -10\sqrt{3}
+          const qCoeff = MathUtil.pick([2, 3, 4, 5]);
+          const divCoeff = MathUtil.pick([2, 3, 4]);
+          const c1 = qCoeff * divCoeff;
+          const divRad = MathUtil.pick([2, 3, 5]);
+          const m = MathUtil.pick([2, 3]);
+          const innerR = MathUtil.pick([2, 3, 5, 7].filter(x => x !== divRad));
+          const dividend = divRad * m * m * innerR;
+          return {
+            q: `${c1}\\sqrt{${dividend}} \\div (-${divCoeff}\\sqrt{${divRad}})`,
+            step: `-${qCoeff}\\sqrt{${dividend / divRad}} = -${qCoeff} \\times ${m}\\sqrt{${innerR}}`,
+            ans: `-${qCoeff * m}\\sqrt{${innerR}}`
+          };
+        }
+      },
+
+      // ③ 単項式の乗法・累乗
+      cat3(diff) {
+        const bases = [2, 3, 5, 7];
+        if (diff === 'standard') {
+          const type = MathUtil.pick(['pos_sq', 'neg_inside_sq', 'neg_outside_sq', 'same_rad_mult', 'cube_rad']);
+          const r = MathUtil.pick(bases);
+          const k = MathUtil.pick([2, 3, 4, 5, 6]);
+
+          if (type === 'pos_sq') {
+            return {
+              q: `(${k}\\sqrt{${r}})^2`,
+              step: `${k}^2 \\times (\\sqrt{${r}})^2 = ${k * k} \\times ${r}`,
+              ans: `${k * k * r}`
+            };
+          }
+          if (type === 'neg_inside_sq') {
+            return {
+              q: `(-${k}\\sqrt{${r}})^2`,
+              step: `(-${k})^2 \\times (\\sqrt{${r}})^2 = ${k * k} \\times ${r}`,
+              ans: `${k * k * r}`
+            };
+          }
+          if (type === 'neg_outside_sq') {
+            return {
+              q: `-(${k}\\sqrt{${r}})^2`,
+              step: `-(${k}^2 \\times (\\sqrt{${r}})^2) = -(${k * k} \\times ${r})`,
+              ans: `-${k * k * r}`
+            };
+          }
+          if (type === 'same_rad_mult') {
+            const k1 = MathUtil.pick([2, 3, 4]);
+            const k2 = MathUtil.pick([2, 3, 5]);
+            const isNeg = Math.random() < 0.4;
+            const q = isNeg ? `(-${k1}\\sqrt{${r}}) \\times ${k2}\\sqrt{${r}}` : `${k1}\\sqrt{${r}} \\times ${k2}\\sqrt{${r}}`;
+            const sign = isNeg ? '-' : '';
+            return {
+              q,
+              step: `${sign}${k1} \\times ${k2} \\times (\\sqrt{${r}})^2 = ${sign}${k1 * k2} \\times ${r}`,
+              ans: `${sign}${k1 * k2 * r}`
+            };
+          }
+          // cube_rad: (\sqrt{a})^3 = a\sqrt{a}
+          const smallR = MathUtil.pick([2, 3, 5]);
+          return {
+            q: `(\\sqrt{${smallR}})^3`,
+            step: `(\\sqrt{${smallR}})^2 \\times \\sqrt{${smallR}}`,
+            ans: `${smallR}\\sqrt{${smallR}}`
+          };
+        } else {
+          // 応用: 累乗の加減組み合わせ
+          const [r1, r2] = MathUtil.shuffle(bases).slice(0, 2);
+          const k1 = MathUtil.pick([2, 3, 4]);
+          const k2 = MathUtil.pick([2, 3]);
+          const m1 = MathUtil.pick([1, 2]);
+          const m2 = MathUtil.pick([1, 2, 3]);
+          const isSub = Math.random() < 0.7;
+          const op = isSub ? '-' : '+';
+          const v1 = m1 * k1 * k1 * r1;
+          const v2 = m2 * k2 * k2 * r2;
+          const p1 = m1 === 1 ? `(${k1}\\sqrt{${r1}})^2` : `${m1}(${k1}\\sqrt{${r1}})^2`;
+          const p2 = m2 === 1 ? `(${k2}\\sqrt{${r2}})^2` : `${m2}(${k2}\\sqrt{${r2}})^2`;
+          return {
+            q: `${p1} ${op} ${p2}`,
+            step: `${v1} ${op} ${v2}`,
+            ans: `${isSub ? v1 - v2 : v1 + v2}`
+          };
+        }
+      },
+
+      // ④ 多項式の乗法・累乗（単項式×多項式、および多項式の2乗）
+      cat4(diff) {
+        const bases = [2, 3, 5, 7];
+        if (diff === 'standard') {
+          const type = MathUtil.pick(['mono_same', 'mono_diff', 'mono_neg', 'poly_sq_plus', 'poly_sq_minus']);
+          if (type === 'mono_same') {
+            // 例: \sqrt{2}(\sqrt{2} + 3)
+            const a = MathUtil.pick(bases);
+            const k = MathUtil.pick([1, 2]);
+            const b = MathUtil.pick([2, 3, 4, 5]);
+            const isAdd = Math.random() < 0.5;
+            const op = isAdd ? '+' : '-';
+            const inner1 = k === 1 ? `\\sqrt{${a}}` : `${k}\\sqrt{${a}}`;
+            const ansC = isAdd ? b : -b;
+            return {
+              q: `\\sqrt{${a}}(${inner1} ${op} ${b})`,
+              step: `${k === 1 ? '' : k}(\\sqrt{${a}})^2 ${op} ${b}\\sqrt{${a}}`,
+              ans: MathUtil.combineTerms([{ c: k * a, r: 1 }, { c: ansC, r: a }])
+            };
+          }
+          if (type === 'mono_diff') {
+            // 例: \sqrt{3}(\sqrt{2} - 5)
+            const [a, b] = MathUtil.shuffle(bases).slice(0, 2);
+            const c = MathUtil.pick([2, 3, 4, 5]);
+            const isAdd = Math.random() < 0.5;
+            const op = isAdd ? '+' : '-';
+            return {
+              q: `\\sqrt{${a}}(\\sqrt{${b}} ${op} ${c})`,
+              step: `\\sqrt{${a} \\times ${b}} ${op} ${c}\\sqrt{${a}}`,
+              ans: MathUtil.combineTerms([{ c: 1, r: a * b }, { c: isAdd ? c : -c, r: a }])
+            };
+          }
+          if (type === 'mono_neg') {
+            // 例: -\sqrt{5}(2\sqrt{5} - \sqrt{3})
+            const [a, b] = MathUtil.shuffle(bases).slice(0, 2);
+            const k = MathUtil.pick([2, 3]);
+            return {
+              q: `-\\sqrt{${a}}(${k}\\sqrt{${a}} - \\sqrt{${b}})`,
+              step: `-${k}(\\sqrt{${a}})^2 + \\sqrt{${a * b}}`,
+              ans: MathUtil.combineTerms([{ c: -k * a, r: 1 }, { c: 1, r: a * b }])
+            };
+          }
+          // poly_sq_plus or minus: (\sqrt{a} \pm b)^2
+          const a = MathUtil.pick(bases);
+          const b = MathUtil.pick([2, 3, 4, 5]);
+          const isPlus = type === 'poly_sq_plus';
+          const op = isPlus ? '+' : '-';
+          return {
+            q: `(\\sqrt{${a}} ${op} ${b})^2`,
+            step: `(\\sqrt{${a}})^2 ${op} 2 \\times \\sqrt{${a}} \\times ${b} + ${b}^2 = ${a} ${op} ${2 * b}\\sqrt{${a}} + ${b * b}`,
+            ans: MathUtil.combineTerms([{ c: a + b * b, r: 1 }, { c: isPlus ? 2 * b : -2 * b, r: a }])
+          };
+        } else {
+          // 応用: 係数付きの2乗、2つの根号の2乗、または2つの展開の加減
+          const aType = MathUtil.pick(['two_rad_sq', 'coeff_sq', 'simplify_mono', 'two_mono_sum']);
+          if (aType === 'two_rad_sq') {
+            // 例: (\sqrt{5} + \sqrt{3})^2
+            const [a, b] = MathUtil.shuffle(bases).slice(0, 2);
+            const isPlus = Math.random() < 0.5;
+            const op = isPlus ? '+' : '-';
+            return {
+              q: `(\\sqrt{${a}} ${op} \\sqrt{${b}})^2`,
+              step: `(\\sqrt{${a}})^2 ${op} 2\\sqrt{${a}}\\sqrt{${b}} + (\\sqrt{${b}})^2 = ${a} ${op} 2\\sqrt{${a * b}} + ${b}`,
+              ans: MathUtil.combineTerms([{ c: a + b, r: 1 }, { c: isPlus ? 2 : -2, r: a * b }])
+            };
+          }
+          if (aType === 'coeff_sq') {
+            // 例: (2\sqrt{5} + 3)^2
+            const a = MathUtil.pick([2, 3, 5]);
+            const k = MathUtil.pick([2, 3]);
+            const b = MathUtil.pick([1, 2, 3]);
+            const isPlus = Math.random() < 0.5;
+            const op = isPlus ? '+' : '-';
+            const firstSq = k * k * a;
+            const mid = 2 * k * b;
+            return {
+              q: `(${k}\\sqrt{${a}} ${op} ${b})^2`,
+              step: `(${k}\\sqrt{${a}})^2 ${op} 2 \\times ${k}\\sqrt{${a}} \\times ${b} + ${b}^2 = ${firstSq} ${op} ${mid}\\sqrt{${a}} + ${b * b}`,
+              ans: MathUtil.combineTerms([{ c: firstSq + b * b, r: 1 }, { c: isPlus ? mid : -mid, r: a }])
+            };
+          }
+          if (aType === 'simplify_mono') {
+            // 例: \sqrt{6}(\sqrt{3} - \sqrt{2}) = 3\sqrt{2} - 2\sqrt{3}
+            const triples = [
+              [6, 3, 2], [6, 2, 3], [10, 5, 2], [15, 5, 3], [14, 7, 2]
+            ];
+            const [outR, in1, in2] = MathUtil.pick(triples);
+            const isPlus = Math.random() < 0.5;
+            const op = isPlus ? '+' : '-';
+            return {
+              q: `\\sqrt{${outR}}(\\sqrt{${in1}} ${op} \\sqrt{${in2}})`,
+              step: `\\sqrt{${outR * in1}} ${op} \\sqrt{${outR * in2}}`,
+              ans: MathUtil.combineTerms([{ c: 1, r: outR * in1 }, { c: isPlus ? 1 : -1, r: outR * in2 }])
+            };
+          }
+          // two_mono_sum: 例: \sqrt{6}(\sqrt{6} - 2) + \sqrt{3}(\sqrt{3} + 2\sqrt{2})
+          return {
+            q: `\\sqrt{6}(\\sqrt{6} - 2) + \\sqrt{3}(\\sqrt{3} + 2\\sqrt{2})`,
+            step: `(6 - 2\\sqrt{6}) + (3 + 2\\sqrt{6})`,
+            ans: `9`
+          };
+        }
+      },
+
+      // ⑤ 多項式同士の乗法（根号の種類を統一して計算をすっきりさせる）
+      cat5(diff) {
+        const bases = [2, 3, 5, 7];
+        if (diff === 'standard') {
+          const type = MathUtil.pick(['basic_foil', 'coeff_foil', 'diff_sq', 'coeff_diff_sq']);
+          const a = MathUtil.pick(bases);
+
+          if (type === 'basic_foil') {
+            // 例: (\sqrt{2} + 3)(\sqrt{2} + 4)
+            const b = MathUtil.pick([1, 2, 3, 4, 5]);
+            let c = MathUtil.pick([-4, -3, -2, -1, 2, 3, 4, 5]);
+            if (b + c === 0) c += 1;
+            const p2 = c > 0 ? `+ ${c}` : `- ${Math.abs(c)}`;
+            const sumBC = b + c;
+            const prodBC = b * c;
+            return {
+              q: `(\\sqrt{${a}} + ${b})(\\sqrt{${a}} ${p2})`,
+              step: `(\\sqrt{${a}})^2 + (${b} ${p2})\\sqrt{${a}} ${prodBC >= 0 ? '+ ' + prodBC : '- ' + Math.abs(prodBC)}`,
+              ans: MathUtil.combineTerms([{ c: a + prodBC, r: 1 }, { c: sumBC, r: a }])
+            };
+          }
+
+          if (type === 'coeff_foil') {
+            // 例: (2\sqrt{3} - 1)(\sqrt{3} + 2)
+            const k = MathUtil.pick([2, 3]);
+            const b = MathUtil.pick([1, 2, 3]);
+            const c = MathUtil.pick([2, 3, 4]);
+            const midC = k * c - b;
+            return {
+              q: `(${k}\\sqrt{${a}} - ${b})(\\sqrt{${a}} + ${c})`,
+              step: `${k}(\\sqrt{${a}})^2 + (${k * c} - ${b})\\sqrt{${a}} - ${b * c} = ${k * a} ${midC >= 0 ? '+ ' + midC : '- ' + Math.abs(midC)}\\sqrt{${a}} - ${b * c}`,
+              ans: MathUtil.combineTerms([{ c: k * a - b * c, r: 1 }, { c: midC, r: a }])
+            };
+          }
+
+          if (type === 'diff_sq') {
+            // 例: (\sqrt{7} + 3)(\sqrt{7} - 3)
+            const useTwoRads = Math.random() < 0.4;
+            if (useTwoRads) {
+              const [r1, r2] = MathUtil.shuffle(bases).slice(0, 2);
+              return {
+                q: `(\\sqrt{${r1}} + \\sqrt{${r2}})(\\sqrt{${r1}} - \\sqrt{${r2}})`,
+                step: `(\\sqrt{${r1}})^2 - (\\sqrt{${r2}})^2 = ${r1} - ${r2}`,
+                ans: `${r1 - r2}`
+              };
+            }
+            const b = MathUtil.pick([2, 3, 4, 5]);
+            return {
+              q: `(\\sqrt{${a}} + ${b})(\\sqrt{${a}} - ${b})`,
+              step: `(\\sqrt{${a}})^2 - ${b}^2 = ${a} - ${b * b}`,
+              ans: `${a - b * b}`
+            };
+          }
+
+          // coeff_diff_sq: (k\sqrt{a} + b)(k\sqrt{a} - b)
+          const k = MathUtil.pick([2, 3]);
+          const b = MathUtil.pick([2, 3, 5]);
+          return {
+            q: `(${k}\\sqrt{${a}} + ${b})(${k}\\sqrt{${a}} - ${b})`,
+            step: `(${k}\\sqrt{${a}})^2 - ${b}^2 = ${k * k * a} - ${b * b}`,
+            ans: `${k * k * a - b * b}`
+          };
+        } else {
+          // 応用: 両辺係数付きの展開、2種類の根号を含む展開、展開公式の組み合わせ
+          const aType = MathUtil.pick(['both_coeff', 'two_rad_foil', 'combo_diff']);
+          if (aType === 'both_coeff') {
+            // 例: (2\sqrt{2} + 1)(3\sqrt{2} - 4)
+            const a = MathUtil.pick([2, 3, 5]);
+            const k1 = 2;
+            const k2 = 3;
+            const b = MathUtil.pick([1, 2]);
+            const c = MathUtil.pick([3, 4, 5]);
+            const first = k1 * k2 * a;
+            const mid = b * k2 - k1 * c;
+            const last = -b * c;
+            return {
+              q: `(${k1}\\sqrt{${a}} + ${b})(${k2}\\sqrt{${a}} - ${c})`,
+              step: `${first} + (${b * k2} - ${k1 * c})\\sqrt{${a}} - ${b * c}`,
+              ans: MathUtil.combineTerms([{ c: first + last, r: 1 }, { c: mid, r: a }])
+            };
+          }
+          if (aType === 'two_rad_foil') {
+            // 例: (\sqrt{5} + \sqrt{2})(\sqrt{5} - 3\sqrt{2})
+            const [r1, r2] = MathUtil.shuffle(bases).slice(0, 2);
+            const k = MathUtil.pick([2, 3]);
+            return {
+              q: `(\\sqrt{${r1}} + \\sqrt{${r2}})(\\sqrt{${r1}} - ${k}\\sqrt{${r2}})`,
+              step: `(\\sqrt{${r1}})^2 + (1 - ${k})\\sqrt{${r1 * r2}} - ${k}(\\sqrt{${r2}})^2 = ${r1} - ${k - 1 === 1 ? '' : k - 1}\\sqrt{${r1 * r2}} - ${k * r2}`,
+              ans: MathUtil.combineTerms([{ c: r1 - k * r2, r: 1 }, { c: 1 - k, r: r1 * r2 }])
+            };
+          }
+          // combo_diff: 例: (\sqrt{5} + 2)^2 - (\sqrt{5} + 3)(\sqrt{5} - 3)
+          const a = MathUtil.pick([2, 3, 5]);
+          const b = 2;
+          const c = 3;
+          const leftConst = a + b * b;
+          const rightConst = a - c * c;
+          return {
+            q: `(\\sqrt{${a}} + ${b})^2 - (\\sqrt{${a}} + ${c})(\\sqrt{${a}} - ${c})`,
+            step: `(${leftConst} + ${2 * b}\\sqrt{${a}}) - (${rightConst})`,
+            ans: MathUtil.combineTerms([{ c: leftConst - rightConst, r: 1 }, { c: 2 * b, r: a }])
+          };
+        }
+      },
+
+      // ⑥ 分母の有理化
+      cat6(diff) {
+        const bases = [2, 3, 5, 7];
+        if (diff === 'standard') {
+          const type = MathUtil.pick(['mono_1', 'mono_rad', 'mono_reduce', 'bin_rad', 'bin_int']);
+
+          if (type === 'mono_1') {
+            // 例: \frac{1}{\sqrt{3}}
+            const a = MathUtil.pick([2, 3, 5, 7, 11]);
+            return {
+              q: `\\frac{1}{\\sqrt{${a}}}`,
+              step: `\\frac{1 \\times \\sqrt{${a}}}{\\sqrt{${a}} \\times \\sqrt{${a}}}`,
+              ans: `\\frac{\\sqrt{${a}}}{${a}}`
+            };
+          }
+          if (type === 'mono_rad') {
+            // 例: \frac{\sqrt{5}}{2\sqrt{3}}
+            const [b, a] = MathUtil.shuffle(bases).slice(0, 2);
+            const k = MathUtil.pick([2, 3, 4]);
+            return {
+              q: `\\frac{\\sqrt{${b}}}{${k}\\sqrt{${a}}}`,
+              step: `\\frac{\\sqrt{${b}} \\times \\sqrt{${a}}}{${k}\\sqrt{${a}} \\times \\sqrt{${a}}}`,
+              ans: `\\frac{\\sqrt{${a * b}}}{${k * a}}`
+            };
+          }
+          if (type === 'mono_reduce') {
+            // 例: \frac{6}{5\sqrt{2}} -> \frac{3\sqrt{2}}{5}
+            const a = MathUtil.pick([2, 3, 5, 7]);
+            const mult = MathUtil.pick([2, 3]);
+            const num = a * mult;
+            const k = MathUtil.pick([1, 3, 4, 5, 7].filter(x => MathUtil.gcd(x, mult) === 1));
+            const denStr = k === 1 ? `\\sqrt{${a}}` : `${k}\\sqrt{${a}}`;
+            const ans = MathUtil.fmtSimpleFrac(num, a, k * a);
+            return {
+              q: `\\frac{${num}}{${denStr}}`,
+              step: `\\frac{${num}\\sqrt{${a}}}{${k === 1 ? a : `${k} \\times ${a}`}} = \\frac{${num}\\sqrt{${a}}}{${k * a}}`,
+              ans
+            };
+          }
+          if (type === 'bin_rad') {
+            // 例: \frac{1}{\sqrt{5} - \sqrt{3}}, \frac{2}{\sqrt{7} + \sqrt{5}}
+            const pairs = [
+              [3, 2, 1], [5, 3, 2], [7, 5, 2], [5, 2, 3], [7, 3, 4], [7, 2, 5]
+            ];
+            const [a, b, d] = MathUtil.pick(pairs);
+            const isPlus = Math.random() < 0.5;
+            const op = isPlus ? '+' : '-';
+            const conjOp = isPlus ? '-' : '+';
+            // 分母の差 d が分子と約分できる問題を中心に構成
+            const num = d === 1 ? 1 : (Math.random() < 0.7 ? d : 1);
+            const q = `\\frac{${num}}{\\sqrt{${a}} ${op} \\sqrt{${b}}}`;
+            if (num === d) {
+              const step = d === 1
+                ? `\\frac{\\sqrt{${a}} ${conjOp} \\sqrt{${b}}}{(\\sqrt{${a}})^2 - (\\sqrt{${b}})^2} = \\frac{\\sqrt{${a}} ${conjOp} \\sqrt{${b}}}{${a} - ${b}}`
+                : `\\frac{${num}(\\sqrt{${a}} ${conjOp} \\sqrt{${b}})}{${a} - ${b}} = \\frac{${num}(\\sqrt{${a}} ${conjOp} \\sqrt{${b}})}{${d}}`;
+              return {
+                q,
+                step,
+                ans: `\\sqrt{${a}} ${conjOp} \\sqrt{${b}}`
+              };
+            } else {
+              return {
+                q,
+                step: `\\frac{\\sqrt{${a}} ${conjOp} \\sqrt{${b}}}{${a} - ${b}}`,
+                ans: `\\frac{\\sqrt{${a}} ${conjOp} \\sqrt{${b}}}{${d}}`
+              };
+            }
+          }
+          // bin_int: 例 \frac{1}{\sqrt{3} + 1}, \frac{3}{\sqrt{7} - 2}
+          const combos = [
+            { a: 3, n: 1, d: 2, num: 1 },
+            { a: 3, n: 1, d: 2, num: 2 },
+            { a: 5, n: 2, d: 1, num: 1 },
+            { a: 5, n: 1, d: 4, num: 4 },
+            { a: 7, n: 2, d: 3, num: 3 },
+            { a: 7, n: 2, d: 3, num: 6 }
+          ];
+          const item = MathUtil.pick(combos);
+          const isPlus = Math.random() < 0.5;
+          const op = isPlus ? '+' : '-';
+          const conjOp = isPlus ? '-' : '+';
+          const q = `\\frac{${item.num}}{\\sqrt{${item.a}} ${op} ${item.n}}`;
+          const step = `\\frac{${item.num === 1 ? '' : item.num}(\\sqrt{${item.a}} ${conjOp} ${item.n})}{${item.a} - ${item.n * item.n}} = \\frac{${item.num === 1 ? '' : item.num}(\\sqrt{${item.a}} ${conjOp} ${item.n})}{${item.d}}`;
+          let ans = '';
+          if (item.num === item.d) {
+            ans = `\\sqrt{${item.a}} ${conjOp} ${item.n}`;
+          } else if (item.num % item.d === 0) {
+            const qVal = item.num / item.d;
+            ans = `${qVal}(\\sqrt{${item.a}} ${conjOp} ${item.n})`;
+          } else {
+            ans = `\\frac{\\sqrt{${item.a}} ${conjOp} ${item.n}}{${item.d}}`;
+          }
+          return { q, step, ans };
+        } else {
+          // 応用: 分母の変形が必要な単項式有理化、分子にも多項式がある有理化、2つの分数の加減
+          const aType = MathUtil.pick(['simplify_den', 'num_rad_bin', 'same_sq_frac', 'two_frac_sum']);
+          if (aType === 'simplify_den') {
+            // 例: \frac{8}{3\sqrt{12}} -> \frac{4\sqrt{3}}{9}
+            const r = MathUtil.pick([2, 3, 5]);
+            const m = MathUtil.pick([2, 3]);
+            const denRad = m * m * r;
+            const k = MathUtil.pick([2, 3]);
+            const num = MathUtil.pick([6, 8, 9, 10, 12, 15]);
+            const ans = MathUtil.fmtSimpleFrac(num, r, k * m * r);
+            return {
+              q: `\\frac{${num}}{${k}\\sqrt{${denRad}}}`,
+              step: `\\frac{${num}}{${k} \\times ${m}\\sqrt{${r}}} = \\frac{${num}\\sqrt{${r}}}{${k * m * r}}`,
+              ans
+            };
+          }
+          if (aType === 'num_rad_bin') {
+            // 例: \frac{\sqrt{2}}{\sqrt{3} + 1} = \frac{\sqrt{6} - \sqrt{2}}{2}
+            const [numR, a] = MathUtil.shuffle([2, 3, 5]).slice(0, 2);
+            const isPlus = Math.random() < 0.5;
+            const op = isPlus ? '+' : '-';
+            const conjOp = isPlus ? '-' : '+';
+            const d = a - 1;
+            const ans = d === 1
+              ? `\\sqrt{${numR * a}} ${conjOp} \\sqrt{${numR}}`
+              : `\\frac{\\sqrt{${numR * a}} ${conjOp} \\sqrt{${numR}}}{${d}}`;
+            return {
+              q: `\\frac{\\sqrt{${numR}}}{\\sqrt{${a}} ${op} 1}`,
+              step: `\\frac{\\sqrt{${numR}}(\\sqrt{${a}} ${conjOp} 1)}{${a} - 1}`,
+              ans
+            };
+          }
+          if (aType === 'same_sq_frac') {
+            // 例: \frac{\sqrt{3} + \sqrt{2}}{\sqrt{3} - \sqrt{2}} = 5 + 2\sqrt{6}
+            const pairs = [
+              [3, 2, 1], [5, 3, 2], [7, 5, 2]
+            ];
+            const [a, b, d] = MathUtil.pick(pairs);
+            const isNumPlus = Math.random() < 0.5;
+            const op1 = isNumPlus ? '+' : '-';
+            const op2 = isNumPlus ? '-' : '+';
+            const q = `\\frac{\\sqrt{${a}} ${op1} \\sqrt{${b}}}{\\sqrt{${a}} ${op2} \\sqrt{${b}}}`;
+            const sumAB = a + b;
+            const prodAB = a * b;
+            let ans = '';
+            if (d === 1) {
+              ans = `${sumAB} ${op1} 2\\sqrt{${prodAB}}`;
+            } else {
+              // (a+b)が偶数なので2で約分できる
+              ans = `${sumAB / 2} ${op1} \\sqrt{${prodAB}}`;
+            }
+            return {
+              q,
+              step: `\\frac{(\\sqrt{${a}} ${op1} \\sqrt{${b}})^2}{${a} - ${b}} = \\frac{${sumAB} ${op1} 2\\sqrt{${prodAB}}}{${d}}`,
+              ans
+            };
+          }
+          // two_frac_sum: 例: \frac{1}{\sqrt{3} + \sqrt{2}} + \frac{1}{\sqrt{3} - \sqrt{2}} = 2\sqrt{3}
+          const pairs = [
+            [3, 2, 1], [5, 3, 2], [7, 5, 2]
+          ];
+          const [a, b, d] = MathUtil.pick(pairs);
+          const isAdd = Math.random() < 0.5;
+          const op = isAdd ? '+' : '-';
+          const q = `\\frac{1}{\\sqrt{${a}} + \\sqrt{${b}}} ${op} \\frac{1}{\\sqrt{${a}} - \\sqrt{${b}}}`;
+          const step = `\\frac{\\sqrt{${a}} - \\sqrt{${b}}}{${d}} ${op} \\frac{\\sqrt{${a}} + \\sqrt{${b}}}{${d}}`;
+          let ans = '';
+          if (isAdd) {
+            ans = d === 1 ? `2\\sqrt{${a}}` : `\\sqrt{${a}}`;
+          } else {
+            ans = d === 1 ? `-2\\sqrt{${b}}` : `-\\sqrt{${b}}`;
+          }
+          return { q, step, ans };
+        }
+      }
+    };
+
+    /**
+     * アプリケーション状態とUI制御
+     */
+    const state = {
+      category: '1',
+      difficulty: 'standard',
+      count: 6,
+      problems: [],
+      showAllAnswers: false
+    };
+
+    const categoryMeta = {
+      '1': { label: '① 足し算・引き算' },
+      '2': { label: '② 掛け算・割り算' },
+      '3': { label: '③ 単項式の乗法・累乗' },
+      '4': { label: '④ 多項式の乗法・累乗' },
+      '5': { label: '⑤ 多項式同士の乗法' },
+      '6': { label: '⑥ 分母の有理化' },
+      'all': { label: '総合演習（①〜⑥ミックス）' }
+    };
+
+    // 重複を除いて指定問数だけ問題を生成する
+    function generateProblems() {
+      const generated = [];
+      const seenQuestions = new Set();
+      const cats = state.category === 'all' ? ['1', '2', '3', '4', '5', '6'] : [state.category];
+
+      let attempts = 0;
+      while (generated.length < state.count && attempts < 200) {
+        attempts++;
+        const targetCat = state.category === 'all'
+          ? cats[generated.length % cats.length]
+          : state.category;
+
+        const item = ProblemGenerators[`cat${targetCat}`](state.difficulty);
+        if (!seenQuestions.has(item.q)) {
+          seenQuestions.add(item.q);
+          generated.push({
+            index: generated.length + 1,
+            catLabel: categoryMeta[targetCat].label,
+            ...item
+          });
+        }
+      }
+
+      state.problems = generated;
+      state.showAllAnswers = false;
+      renderAll();
+    }
+
+    // 画面描画とMathJax再レンダリング
+    function renderAll() {
+      // 問題カードの描画（スマホでも数式とボタンが重ならない2段構造）
+      const probContainer = document.getElementById('problems-container');
+      probContainer.innerHTML = state.problems.map((p) => `
+        <div class="print-card rounded-xl border border-slate-200 bg-white p-3.5 sm:p-5 flex flex-col justify-between transition-colors hover:border-slate-300 min-w-0">
+          <!-- 上段：左に問題番号(1)と単元タグ、右に「答えを見る」ボタン（絶対にはみ出さない配置） -->
+          <div class="flex items-center justify-between gap-2 mb-1.5">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="font-bold text-[#1E3A5F] text-sm sm:text-base shrink-0">(${p.index})</span>
+              ${state.category === 'all' ? `<span class="text-[11px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded truncate">${p.catLabel}</span>` : ''}
+            </div>
+            <button type="button" id="btn-single-${p.index}" onclick="toggleSingleAnswer(${p.index})" class="no-print text-xs px-2.5 py-1.5 rounded-md border border-slate-200 text-slate-600 hover:text-[#1E3A5F] hover:border-[#1E3A5F] bg-slate-50/60 transition-colors shrink-0 whitespace-nowrap cursor-pointer">
+              答えを見る
+            </button>
+          </div>
+
+          <!-- 中段：数式エリア（カード横幅いっぱいを確保し、長すぎる式も横スクロール可能） -->
+          <div class="math-display-box text-lg sm:text-xl text-slate-900 py-1.5 pl-1">
+            \\(${p.q}\\)
+          </div>
+
+          <!-- 下段：個別表示用のミニ解答エリア（画面用・印刷時は非表示） -->
+          <div id="inline-ans-${p.index}" class="hidden no-print mt-2.5 pt-2.5 border-t border-slate-100 text-xs sm:text-sm bg-emerald-50/70 rounded-lg px-3 py-2">
+            <div class="math-display-box text-slate-600 mb-1">途中式：\\(${p.step}\\)</div>
+            <div class="math-display-box font-bold text-emerald-800 text-sm sm:text-base">答：\\(${p.ans}\\)</div>
+          </div>
+        </div>
+      `).join('');
+
+      // 解答・解説カードの描画
+      const ansContainer = document.getElementById('answers-container');
+      ansContainer.innerHTML = state.problems.map((p) => `
+        <div class="answer-card rounded-lg border border-slate-200 bg-slate-50/50 p-3 sm:p-3.5 flex items-start gap-2.5 min-w-0">
+          <span class="font-bold text-emerald-700 text-sm shrink-0 mt-0.5">(${p.index})</span>
+          <div class="text-xs sm:text-sm text-slate-700 space-y-1 flex-1 min-w-0">
+            <div class="math-display-box text-slate-500">\\(${p.q} = ${p.step}\\)</div>
+            <div class="math-display-box font-bold text-slate-900 text-sm sm:text-base">答：\\(${p.ans}\\)</div>
+          </div>
+        </div>
+      `).join('');
+
+      updateAnswerSectionVisibility();
+
+      // MathJax で数式を美しく組版
+      if (window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetClear([probContainer, ansContainer]);
+        window.MathJax.typesetPromise([probContainer, ansContainer]).catch((err) => {
+          console.error('MathJax typeset error:', err);
+        });
+      }
+    }
+
+    // 個別の「答えを見る」トグル
+    window.toggleSingleAnswer = function(index) {
+      const el = document.getElementById(`inline-ans-${index}`);
+      const btn = document.getElementById(`btn-single-${index}`);
+      if (el) {
+        const isNowHidden = el.classList.toggle('hidden');
+        if (btn) {
+          btn.textContent = isNowHidden ? '答えを見る' : '答えを隠す';
+        }
+      }
+    };
+
+    // 解答セクション全体の表示・非表示切り替え
+    function updateAnswerSectionVisibility() {
+      const placeholder = document.getElementById('answers-placeholder');
+      const ansContainer = document.getElementById('answers-container');
+      const toggleText = document.getElementById('toggle-answers-text');
+
+      if (state.showAllAnswers) {
+        placeholder.classList.add('hidden');
+        ansContainer.classList.remove('hidden');
+        ansContainer.classList.add('grid');
+        toggleText.textContent = '解答・解説を隠す';
+      } else {
+        placeholder.classList.remove('hidden');
+        ansContainer.classList.add('hidden');
+        ansContainer.classList.remove('grid');
+        toggleText.textContent = '解答・解説を表示する';
+      }
+    }
+
+    // 選択中ボタンのアクティブスタイル更新
+    function updateControlStyles() {
+      document.querySelectorAll('.cat-btn').forEach((btn) => {
+        const isSelected = btn.dataset.cat === state.category;
+        if (isSelected) {
+          btn.className = btn.className
+            .replace(/border-slate-200 bg-white text-slate-700 hover:bg-slate-50/g, '')
+            .trim();
+          btn.classList.add('border-[#1E3A5F]', 'bg-blue-50/70', 'text-[#1E3A5F]', 'ring-1', 'ring-[#1E3A5F]');
+          const badge = btn.querySelector('span:first-child');
+          badge.classList.remove('bg-slate-100', 'text-slate-700');
+          badge.classList.add('bg-[#1E3A5F]', 'text-white');
+        } else {
+          btn.classList.remove('border-[#1E3A5F]', 'bg-blue-50/70', 'text-[#1E3A5F]', 'ring-1', 'ring-[#1E3A5F]');
+          btn.classList.add('border-slate-200', 'bg-white', 'text-slate-700', 'hover:bg-slate-50');
+          const badge = btn.querySelector('span:first-child');
+          badge.classList.remove('bg-[#1E3A5F]', 'text-white');
+          badge.classList.add('bg-slate-100', 'text-slate-700');
+        }
+      });
+
+      document.querySelectorAll('.diff-btn').forEach((btn) => {
+        const isSelected = btn.dataset.diff === state.difficulty;
+        if (isSelected) {
+          btn.classList.add('bg-[#1E3A5F]', 'text-white', 'shadow-sm');
+          btn.classList.remove('text-slate-600', 'hover:text-slate-900');
+        } else {
+          btn.classList.remove('bg-[#1E3A5F]', 'text-white', 'shadow-sm');
+          btn.classList.add('text-slate-600', 'hover:text-slate-900');
+        }
+      });
+    }
+
+    // イベントリスナー登録
+    document.addEventListener('DOMContentLoaded', () => {
+      // 単元ボタン
+      document.querySelectorAll('.cat-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          state.category = btn.dataset.cat;
+          updateControlStyles();
+          generateProblems();
+        });
+      });
+
+      // 難易度ボタン
+      document.querySelectorAll('.diff-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          state.difficulty = btn.dataset.diff;
+          updateControlStyles();
+          generateProblems();
+        });
+      });
+
+      // 問題数セレクト
+      document.getElementById('problem-count').addEventListener('change', (e) => {
+        state.count = parseInt(e.target.value, 10);
+        generateProblems();
+      });
+
+      // 新しい問題を作成ボタン
+      document.getElementById('btn-generate').addEventListener('click', () => {
+        generateProblems();
+      });
+
+      // 解答・解説トグルボタン
+      document.getElementById('btn-toggle-answers').addEventListener('click', () => {
+        state.showAllAnswers = !state.showAllAnswers;
+        updateAnswerSectionVisibility();
+      });
+
+      // A4印刷ボタン
+      document.getElementById('btn-print').addEventListener('click', () => {
+        window.print();
+      });
+
+      // 初期状態セットと初回問題生成
+      updateControlStyles();
+      // MathJaxの読み込み完了を待って初回描画
+      const initInterval = setInterval(() => {
+        if (window.MathJax && window.MathJax.typesetPromise) {
+          clearInterval(initInterval);
+          generateProblems();
+        }
+      }, 50);
+    });
+  </script>
+</body>
+</html>
